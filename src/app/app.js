@@ -136,7 +136,7 @@ export function startApp(st, desk) {
       T(0.42, (k) => { const e = easeInOut(k); old.position.set(p0.x - e * 120, p0.y - e * 60, p0.z + e * 40); old.scale.setScalar(1 - e * 0.35); }, () => { if (old !== S.stand) scene.remove(old); old.scale.setScalar(1); });
     }
     const stand = getStand(id);
-    S.stand = stand; S.hot = hotspotsFor(id, stand.userData.model);
+    S.stand = stand; S.hot = hotspotsFor(id, stand.userData.model); S.hover = -1;
     stand.userData.flip.rotation.set(0, 0, 0);
     scene.add(stand);
     stand.position.set(0, -80, 0); stand.scale.setScalar(0.82);
@@ -192,7 +192,7 @@ export function startApp(st, desk) {
   let outline = null;
   function showOutline(i) {
     if (outline) { outline.parent && outline.parent.remove(outline); outline.geometry.dispose(); outline = null; }
-    if (i < 0 || !S.stand) return;
+    if (i < 0 || !S.stand || !S.hot[i]) return;
     const b = S.hot[i].box, sx = b[3] - b[0], sy = b[4] - b[1], sz = b[5] - b[2];
     const g = new THREE.EdgesGeometry(new THREE.BoxGeometry(sx + 1.2, sy + 1.2, sz + 1.2));
     outline = new THREE.LineSegments(g, new THREE.LineBasicMaterial({color: '#fff6e0', transparent: true, opacity: 0.95, depthTest: false}));
@@ -200,6 +200,7 @@ export function startApp(st, desk) {
     S.stand.userData.model.root.add(outline);
   }
   function hotCenter(i, top = false) {
+    if (!S.hot[i]) return new THREE.Vector3();
     const b = S.hot[i].box, v = new THREE.Vector3((b[0] + b[3]) / 2, top ? b[4] : (b[1] + b[4]) / 2, (b[2] + b[5]) / 2);
     return S.stand.userData.model.root.localToWorld(v);
   }
