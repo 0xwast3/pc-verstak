@@ -322,6 +322,8 @@ export function createBench(ctx) {
   function pointerUp(x, y) {
     const D = B.drag; B.drag = null; if (!D) return;
     if (!D.started) { partClick(D.p); return; }
+    // find the seat under the release point now, so a drop never waits on the next frame
+    D.x = x; D.y = y; setRay(x, y); D.snap = findSnap(D.p);
     drop(D); poke(800);
   }
   function partClick(p) {
@@ -387,7 +389,7 @@ export function createBench(ctx) {
         return;
       }
       if (it.cat === 'board') { if (!overTray(ev.clientX, ev.clientY)) switchBoard(id); return; }
-      if (D) { D.p.obj.visible = true; B.drag = null; if (overTray(ev.clientX, ev.clientY)) sendHome(D.p); else drop(D); }
+      if (D) { D.p.obj.visible = true; B.drag = null; if (overTray(ev.clientX, ev.clientY)) sendHome(D.p); else { setRay(ev.clientX, ev.clientY); D.snap = findSnap(D.p); drop(D); } }
     };
     addEventListener('pointermove', mv); addEventListener('pointerup', up); addEventListener('pointercancel', up);
   }
